@@ -146,14 +146,6 @@ export default function Sidebar() {
             '--ListItem-radius': (theme) => theme.vars.radius.sm,
           }}
         >
-          {/* <ListItem>
-            <ListItemButton>
-              <HomeRoundedIcon />
-              <ListItemContent>
-                <Typography level="title-sm">Home</Typography>
-              </ListItemContent>
-            </ListItemButton>
-          </ListItem> */}
 
           <ListItem>
             <ListItemButton>
@@ -164,14 +156,6 @@ export default function Sidebar() {
             </ListItemButton>
           </ListItem>
 
-          {/* <ListItem>
-            <ListItemButton selected>
-              <ShoppingCartRoundedIcon />
-              <ListItemContent>
-                <Typography level="title-sm">Orders</Typography>
-              </ListItemContent>
-            </ListItemButton>
-          </ListItem> */}
 
           <ListItem nested>
             <Toggler
@@ -204,7 +188,7 @@ export default function Sidebar() {
             </Toggler>
           </ListItem>
 
-          <ListItem>
+          {/* <ListItem>
             <ListItemButton
               role="menuitem"
               component="a"
@@ -218,7 +202,7 @@ export default function Sidebar() {
                 4
               </Chip>
             </ListItemButton>
-          </ListItem>
+          </ListItem> */}
 
           <ListItem nested>
             <Toggler
@@ -226,7 +210,7 @@ export default function Sidebar() {
                 <ListItemButton onClick={() => setOpen(!open)}>
                   <GroupRoundedIcon />
                   <ListItemContent>
-                    <Typography level="title-sm">Users</Typography>
+                    <Typography level="title-sm">User list</Typography>
                   </ListItemContent>
                   <KeyboardArrowDownIcon
                     sx={{ transform: open ? 'rotate(180deg)' : 'none' }}
