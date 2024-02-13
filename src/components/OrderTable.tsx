@@ -1,7 +1,6 @@
 import * as React from "react";
 import Box from "@mui/joy/Box";
 import Divider from "@mui/joy/Divider";
-import Link from "@mui/joy/Link";
 import Table from "@mui/joy/Table";
 import Sheet from "@mui/joy/Sheet";
 import IconButton, { iconButtonClasses } from "@mui/joy/IconButton";
@@ -40,7 +39,6 @@ export default function OrderTable() {
   const [openAddModal, setOpenAddModal] = React.useState<boolean>(false);
   const [openEditModal, setOpenEditModal] = React.useState<boolean>(false);
   const [allData, setAllData] = React.useState<Job[]>([]);
-  const [openEdit, setOpenEdit] = React.useState<boolean>(false);
   const [name, setName] = React.useState<string>("");
   const [location, setLocation] = React.useState<string>("");
   const [experience, setExperience] = React.useState<string>("");
@@ -48,6 +46,8 @@ export default function OrderTable() {
   const [corporateType, setCorporateType] = React.useState<string>("");
   const [employmentType, setEmploymentType] = React.useState<string>("");
   const [salary, setSalary] = React.useState<string>("");
+  const [searchQuery, setSearchQuery] = React.useState<string>("");
+
 
   // Function to fetch all data
   const fetchData = async () => {
@@ -59,6 +59,12 @@ export default function OrderTable() {
       console.log("Job data is wrong:", error);
     }
   };
+  
+// Fuction to search data from datas
+  const filteredData = allData.filter((data) =>
+  data.name.toLowerCase().includes(searchQuery.toLowerCase()),
+);
+
 
   // Fetching all data on component mount
   React.useEffect(() => {
@@ -102,7 +108,7 @@ export default function OrderTable() {
     }
   };
 
-  // Function to handle deletion of data
+  // Function deletion of data
   const handleDelete = async (_id: string) => {
     try {
       const response = await fetch(`${BASEURL}jobs/${_id}`, {
@@ -119,31 +125,50 @@ export default function OrderTable() {
     }
   };
 
-  // Function to handle updating of data
-  const handleUpdate = async (_id: string) => {
-    try {
-      const response = await fetch(`${BASEURL}jobs/${_id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          location,
-          experience,
-          education,
-          corporateType,
-          employmentType,
-          salary,
-        } as Job),
-      });
-      if (response.ok) {
-        setOpenEdit(false);
-      }
-    } catch (error) {
-      console.error;
+  // Function to updating of data
+const handleUpdate = async (_id: string) => {
+  try {
+    const response = await fetch(`${BASEURL}jobs/${_id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        location,
+        experience,
+        education,
+        corporateType,
+        employmentType,
+        salary,
+      } as Job),
+    });
+    if (response.ok) {
+      // Update the specific job in allData with the new data
+      setAllData(prevData =>
+        prevData.map(job => {
+          if (job._id === _id) {
+            return {
+              ...job,
+              name,
+              location,
+              experience,
+              education,
+              corporateType,
+              employmentType,
+              salary,
+            };
+          }
+          return job;
+        })
+      );
+      setOpenEditModal(false); // Close the edit modal
     }
-  };
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 
   return (
     <React.Fragment>
@@ -161,11 +186,14 @@ export default function OrderTable() {
         }}
       >
         <FormControl sx={{ flex: 1 }} size="sm">
-          <FormLabel>Search for offer</FormLabel>
+          <FormLabel>Search job for offer</FormLabel>
+          <FormLabel>There are {allData.length} jobs are available</FormLabel>
           <Input
             size="sm"
             placeholder="Search"
             startDecorator={<SearchIcon />}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </FormControl>
         <Button
@@ -217,7 +245,7 @@ export default function OrderTable() {
                   autoFocus
                   required
                 />
-              </FormControl> 
+              </FormControl>
               <FormControl>
                 <FormLabel>Education</FormLabel>
                 <Input
@@ -227,7 +255,7 @@ export default function OrderTable() {
                   autoFocus
                   required
                 />
-              </FormControl> 
+              </FormControl>
               <FormControl>
                 <FormLabel>Corporate Type</FormLabel>
                 <Input
@@ -237,7 +265,7 @@ export default function OrderTable() {
                   autoFocus
                   required
                 />
-              </FormControl> 
+              </FormControl>
               <FormControl>
                 <FormLabel>Employment Type</FormLabel>
                 <Input
@@ -247,7 +275,7 @@ export default function OrderTable() {
                   autoFocus
                   required
                 />
-              </FormControl> 
+              </FormControl>
               <FormControl>
                 <FormLabel>Salary</FormLabel>
                 <Input
@@ -257,7 +285,7 @@ export default function OrderTable() {
                   autoFocus
                   required
                 />
-              </FormControl> 
+              </FormControl>
               <Button type="submit">Add</Button>
             </Stack>
           </form>
@@ -309,7 +337,7 @@ export default function OrderTable() {
             </tr>
           </thead>
           <tbody>
-            {allData.map((data) => (
+            {filteredData.map((data) => (
               <tr key={data._id}>
                 <td style={{ textAlign: "center", width: 120 }}></td>
                 <td>
@@ -349,7 +377,21 @@ export default function OrderTable() {
                         <MoreHorizRoundedIcon />
                       </MenuButton>
                       <Menu size="sm" sx={{ minWidth: 140 }}>
-                        <MenuItem onClick={() => setOpenEdit(true)}>Edit</MenuItem>
+                        <MenuItem
+                          onClick={() => {
+                            setName(data.name);
+                            setLocation(data.location);
+                            setExperience(data.experience);
+                            setEducation(data.education);
+                            setCorporateType(data.corporateType);
+                            setEmploymentType(data.employmentType);
+                            setSalary(data.salary);
+                            setOpenEditModal(true);
+                          }}
+                        >
+                          Edit
+                        </MenuItem>
+
                         <MenuItem
                           onClick={() => handleDelete(data._id)}
                           color="danger"
@@ -360,7 +402,10 @@ export default function OrderTable() {
                       </Menu>
                     </Dropdown>
                     <Sheet>
-                      {/* <Modal onClose={() => setOpenEdit(false)}>
+                      <Modal
+                        open={openEditModal}
+                        onClose={() => setOpenEditModal(false)}
+                      >
                         <ModalDialog>
                           <DialogTitle>Edit Information</DialogTitle>
                           <form
@@ -368,23 +413,25 @@ export default function OrderTable() {
                               event: React.FormEvent<HTMLFormElement>
                             ) => {
                               event.preventDefault();
-                              setOpenEdit(false);
+                              handleUpdate(data._id);
                             }}
                           >
-                            <Stack spacing={2}>
+                            <Stack spacing={2} sx={{ p: 2 }}>
                               <FormControl>
                                 <FormLabel>Name</FormLabel>
                                 <Input
                                   placeholder="Name"
+                                  value={name}
                                   onChange={(e) => setName(e.target.value)}
                                   autoFocus
                                   required
                                 />
                               </FormControl>
                               <FormControl>
-                                <FormLabel> Experience</FormLabel>
+                                <FormLabel>Location</FormLabel>
                                 <Input
                                   placeholder="Location"
+                                  value={location}
                                   onChange={(e) => setLocation(e.target.value)}
                                   autoFocus
                                   required
@@ -394,6 +441,7 @@ export default function OrderTable() {
                                 <FormLabel>Experience</FormLabel>
                                 <Input
                                   placeholder="Experience"
+                                  value={experience}
                                   onChange={(e) =>
                                     setExperience(e.target.value)
                                   }
@@ -405,15 +453,17 @@ export default function OrderTable() {
                                 <FormLabel>Education</FormLabel>
                                 <Input
                                   placeholder="Education"
+                                  value={education}
                                   onChange={(e) => setEducation(e.target.value)}
                                   autoFocus
                                   required
                                 />
                               </FormControl>
                               <FormControl>
-                                <FormLabel>Corporate Type </FormLabel>
+                                <FormLabel>Corporate Type</FormLabel>
                                 <Input
                                   placeholder="Corporate Type"
+                                  value={corporateType}
                                   onChange={(e) =>
                                     setCorporateType(e.target.value)
                                   }
@@ -424,7 +474,8 @@ export default function OrderTable() {
                               <FormControl>
                                 <FormLabel>Employment Type</FormLabel>
                                 <Input
-                                  placeholder="Employment Type"
+                                  placeholder="Employment type"
+                                  value={employmentType}
                                   onChange={(e) =>
                                     setEmploymentType(e.target.value)
                                   }
@@ -436,28 +487,26 @@ export default function OrderTable() {
                                 <FormLabel>Salary</FormLabel>
                                 <Input
                                   placeholder="Salary"
+                                  value={salary}
                                   onChange={(e) => setSalary(e.target.value)}
                                   autoFocus
                                   required
                                 />
                               </FormControl>
-                              <Button
-                                type="submit"
-                                onClick={() => handleUpdate(data._id)}
-                              >
-                                Update
+                              <Button type="submit" color="success">
+                                Edit
                               </Button>
                               <Button
-                                color="danger"
-                                type="submit"
-                                onClick={() => handleUpdate(data._id)}
+                                onClick={() => {
+                                  setOpenEditModal(false);
+                                }}
                               >
                                 Cancel
                               </Button>
                             </Stack>
                           </form>
                         </ModalDialog>
-                      </Modal> */}
+                      </Modal>
                     </Sheet>
                   </Box>
                 </td>
