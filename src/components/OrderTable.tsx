@@ -47,7 +47,10 @@ export default function OrderTable() {
   const [employmentType, setEmploymentType] = React.useState<string>("");
   const [salary, setSalary] = React.useState<string>("");
   const [searchQuery, setSearchQuery] = React.useState<string>("");
-
+  const [editData, setEditData] = React.useState<Partial<Job>>({});
+  const [editModalOpen, setEditModalOpen] = React.useState<boolean>(false);
+  const [editRowId, setEditRowId] = React.useState<string | null>(null);
+  
 
   // Function to fetch all data
   const fetchData = async () => {
@@ -379,14 +382,9 @@ const handleUpdate = async (_id: string) => {
                       <Menu size="sm" sx={{ minWidth: 140 }}>
                         <MenuItem
                           onClick={() => {
-                            setName(data.name);
-                            setLocation(data.location);
-                            setExperience(data.experience);
-                            setEducation(data.education);
-                            setCorporateType(data.corporateType);
-                            setEmploymentType(data.employmentType);
-                            setSalary(data.salary);
-                            setOpenEditModal(true);
+                            setEditData(data);
+                            setEditRowId(data._id);
+                            setEditModalOpen(true);
                           }}
                         >
                           Edit
@@ -403,8 +401,8 @@ const handleUpdate = async (_id: string) => {
                     </Dropdown>
                     <Sheet>
                       <Modal
-                        open={openEditModal}
-                        onClose={() => setOpenEditModal(false)}
+                        open={editModalOpen}
+                        onClose={() => setEditModalOpen(false)}
                       >
                         <ModalDialog>
                           <DialogTitle>Edit Information</DialogTitle>
